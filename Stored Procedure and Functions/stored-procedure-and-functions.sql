@@ -5,14 +5,14 @@ CREATE TABLE Pessoa (
 			id INT NOT NULL AUTO_INCREMENT,
 			nome VARCHAR(40) NOT NULL,
 			data_nascimento DATE NOT NULL,
-			cpf VARCHAR(11) NOT NULL UNIQUE,
+			cpf VARCHAR(12) NOT NULL UNIQUE,
 			PRIMARY KEY(id)
 );
 
 CREATE TABLE CNH (
 			id INT NOT NULL AUTO_INCREMENT,
 			data_vencimento DATE NOT NULL,
-			numero_cnh VARCHAR(10) NOT NULL UNIQUE,
+			numero_cnh VARCHAR(11) NOT NULL UNIQUE,
 			id_pessoa INT NOT NULL,
 			PRIMARY KEY(id),
 			FOREIGN KEY(id_pessoa) 
@@ -74,7 +74,6 @@ DELIMITER ;
 
 /*------ CRIAÇÃO DA PROCEDURE PARA INSERÇÃO DE DADOS NA TABELA CNH ------*/
 DELIMITER $$
-
 CREATE PROCEDURE sp_InsereCNH(IN nova_data DATE, IN novo_numero VARCHAR(10), IN novo_id INT)
 BEGIN 
 	IF(SELECT LENGTH(novo_numero) != '10') THEN
@@ -92,9 +91,8 @@ END $$
 DELIMITER ;
 
 
-/*------ CRIAÇÃO DA PROCEDURE PARA ALTERAÇÃO DE DADOS NA TABELA Pessoa ------*/
+/*------ CRIAÇÃO DA PROCEDURE PARA ALTERAÇÃO DE DADOS NA TABELA PESSOA ------*/
 DELIMITER $$
-
 CREATE PROCEDURE sp_AlteraPessoa(IN id_atual INT, IN novo_nome VARCHAR(40), IN nova_data DATE, IN novo_cpf VARCHAR(11))
 BEGIN
 	IF(SELECT LENGTH(novo_cpf) != '11') THEN
@@ -115,9 +113,8 @@ END $$
 DELIMITER ;
 
 
-/*------ CRIAÇÃO DA PROCEDURE PARA ALTERAÇÃO DE DADOS NA TABELA Pessoa ------*/
+/*------ CRIAÇÃO DA PROCEDURE PARA ALTERAÇÃO DE DADOS NA TABELA CNH ------*/
 DELIMITER $$
-
 CREATE PROCEDURE sp_AlteraCNH(IN id_atual INT, IN nova_data DATE, IN novo_numero VARCHAR(10))
 BEGIN 
 	
@@ -365,6 +362,117 @@ DELIMITER $$
 		END IF;
     END;
 $$ DELIMITER ;
+
+
+/*------ CRIAÇÃO DA FUNCTION PARA ALTERAÇÃO DE DADOS NA TABELA PESSOA ------*/
+DROP FUNCTION IF EXISTS AlteraPessoa;
+DELIMITER $$
+    CREATE FUNCTION AlteraPessoa(id_atual INT, novo_nome VARCHAR(40), nova_data DATE, novo_cpf VARCHAR(11))
+    RETURNS VARCHAR(100)
+    	LANGUAGE SQL
+    BEGIN
+		DECLARE result VARCHAR(100);
+
+		IF( (SELECT COUNT(*) FROM pessoa WHERE pessoa.id = id_atual) != 1) THEN
+			SET result = ( SELECT TipoErro(-3) );
+			RETURN result;
+
+		ELSEIF(SELECT LENGTH(novo_cpf) != 11) THEN
+			SET result = ( SELECT TipoErro(-2) );
+			RETURN result;
+
+		ELSEIF( (id_atual = "") || (novo_nome = "") || (nova_data = "") || (nova_data = "0000-00-00") || (novo_cpf = "")) THEN
+			SET result = ( SELECT TipoErro(-1) );
+			RETURN result;
+
+		ELSE
+			UPDATE pessoa SET pessoa.nome = novo_nome, pessoa.data_nascimento = nova_data, pessoa.cpf = novo_cpf WHERE pessoa.id = id_atual;
+			SET result = ( SELECT TipoErro(-0) );
+			RETURN result;
+
+		END IF;
+    END;
+$$ DELIMITER ;
+
+
+/*------ CRIAÇÃO DA FUNCTION PARA ALTERAÇÃO DE DADOS NA TABELA CNH ------*/
+DROP FUNCTION IF EXISTS AlteraCNH;
+DELIMITER $$
+    CREATE FUNCTION AlteraCNH(id_atual INT, nova_data DATE, novo_numero VARCHAR(10))
+    RETURNS VARCHAR(100)
+    	LANGUAGE SQL
+    BEGIN
+		DECLARE result VARCHAR(100);
+
+		IF( (SELECT COUNT(*) FROM pessoa WHERE pessoa.id = id_atual) != 1) THEN
+			SET result = ( SELECT TipoErro(-3) );
+			RETURN result;
+
+		ELSEIF(SELECT LENGTH(novo_numero) != 10) THEN
+			SET result = ( SELECT TipoErro(-2) );
+			RETURN result;
+
+		ELSEIF( (id_atual = "") || (nova_data = "") || (nova_data = "0000-00-00") || (novo_numero = "")) THEN
+			SET result = ( SELECT TipoErro(-1) );
+			RETURN result;
+
+		ELSE
+			UPDATE cnh, pessoa SET cnh.data_vencimento = nova_data, cnh.numero_cnh = novo_numero WHERE pessoa.id = cnh.id_pessoa AND id_atual = pessoa.id;
+			SET result = ( SELECT TipoErro(-0) );
+			RETURN result;
+
+		END IF;
+    END;
+$$ DELIMITER ;
+
+SELECT AlteraCNH(7, "1010-10-10", "8484848484");
+
+/*------ CRIAÇÃO DA PROCEDURE COM FUNCTION PARA INSERÇÃO DE DADOS NA TABELA Pessoa ------*/
+DROP PROCEDURE IF EXISTS spf_InserePessoa;
+DELIMITER $$
+CREATE PROCEDURE spf_InserePessoa(IN novo_nome VARCHAR(40), IN nova_data DATE, IN novo_cpf VARCHAR(12))
+BEGIN 
+
+	SELECT inserirPessoa(novo_nome, nova_data, novo_cpf);
+
+END $$
+DELIMITER ;
+
+
+/*------ CRIAÇÃO DA PROCEDURE COM FUNCTION PARA INSERÇÃO DE DADOS NA TABELA CNH ------*/
+DROP PROCEDURE IF EXISTS spf_InsereCNH;
+DELIMITER $$
+CREATE PROCEDURE spf_InsereCNH(IN nova_data DATE, IN novo_numero VARCHAR(11), IN novo_id INT)
+BEGIN 
+	
+	SELECT inserirCNH( nova_data, novo_numero, novo_id);
+
+END $$
+DELIMITER ;
+
+
+/*------ CRIAÇÃO DA PROCEDURE COM FUNCTION PARA ALTERAÇÃO DE DADOS NA TABELA PESSOA ------*/
+DROP PROCEDURE IF EXISTS spf_AlteraPessoa;
+DELIMITER $$
+CREATE PROCEDURE spf_AlteraPessoa(IN id_atual INT, IN novo_nome VARCHAR(40), IN nova_data DATE, IN novo_cpf VARCHAR(11))
+BEGIN
+	
+	SELECT AlteraPessoa(id_atual, novo_nome, nova_data, novo_cpf);
+
+END $$
+DELIMITER ;
+
+
+/*------ CRIAÇÃO DA PROCEDURE COM FUNCTION PARA ALTERAÇÃO DE DADOS NA TABELA CNH ------*/
+DROP PROCEDURE IF EXISTS spf_AlteraCNH;
+DELIMITER $$
+CREATE PROCEDURE spf_AlteraCNH(IN id_atual INT, IN nova_data DATE, IN novo_numero VARCHAR(10))
+BEGIN
+	
+	SELECT AlteraCNH(id_atual, nova_data, novo_numero);
+
+END $$
+DELIMITER ;
 
 
 /*------ ESCOPO DA CHAMADA DAS PROCEDURES DE INSERSÃO DE REGISTROS ------*/
