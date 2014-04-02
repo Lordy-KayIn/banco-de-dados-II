@@ -189,3 +189,29 @@ CALL sp_AlteraCNH(/*Id Pessoa*/"3", /*Data_vencimento*/"2015-05-25", /*Numero CN
 /*------ ESCOPO DA CHAMADA DAS PROCEDURES DE EXCLUSÃO DE REGISTROS ------*/
 CALL sp_ExcluirPessoa(/*Id Pessoa*/"7");
 CALL sp_ExcluirCNH(/*Id Pessoa*/"3");
+
+
+/*------ CRIAÇÃO DA FUNCTION VERIFICAR CAMPOS PESSOA ------*/
+DROP FUNCTION IF EXISTS VerificarCamposPessoa;
+DELIMITER $$
+    CREATE FUNCTION VerificarCamposPessoa(id INT, nome VARCHAR(40), data_nascimento DATE, cpf VARCHAR(11))
+    RETURNS VARCHAR(100)
+    	LANGUAGE SQL
+    BEGIN
+		DECLARE result VARCHAR(100);
+
+		IF((id = '') || (nome = "") || (data_nascimento = "") || (cpf = "")) THEN
+			SET result = (SELECT CONCAT(Erro.codigo, ' | ', Erro.significado) FROM Erro WHERE Erro.codigo = -1);
+			RETURN result;
+
+		ELSE
+			SET result = (SELECT CONCAT(Erro.codigo, ' | ', Erro.significado) FROM Erro WHERE Erro.codigo = 0);
+			RETURN result;
+
+		END IF;
+    END;
+$$ DELIMITER ;
+
+/*------ CHAMADA DA FUNCTION VERIFICAR CAMPOS PESSOA ------*/ 
+SELECT VerificarCamposPessoa(1, "","1777-04-30", "91861741711");
+SELECT VerificarCamposPessoa(1, "Carl Friedrich Gauss","1777-04-30", "91861741711");
