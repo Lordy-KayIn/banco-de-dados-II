@@ -72,7 +72,6 @@ END $$
 DELIMITER ;
 
 
-
 /*------ CRIAÇÃO DA PROCEDURE PARA INSERÇÃO DE DADOS NA TABELA CNH ------*/
 DELIMITER $$
 
@@ -115,6 +114,7 @@ BEGIN
 END $$
 DELIMITER ;
 
+
 /*------ CRIAÇÃO DA PROCEDURE PARA ALTERAÇÃO DE DADOS NA TABELA Pessoa ------*/
 DELIMITER $$
 
@@ -137,6 +137,7 @@ BEGIN
 	END IF;
 END $$ 
 DELIMITER ;
+
 
 /*------ CRIAÇÃO DA PROCEDURE PARA EXCLUSÃO DE DADOS NA TABELA Pessoa ------*/
 DELIMITER $$
@@ -178,6 +179,112 @@ END $$
 DELIMITER ;
 
 
+/*------ CRIAÇÃO DA FUNCTION VERIFICAR CAMPOS PESSOA ------*/
+DROP FUNCTION IF EXISTS VerificarCamposPessoa;
+DELIMITER $$
+    CREATE FUNCTION VerificarCamposPessoa(id INT, nome VARCHAR(40), data_nascimento DATE, cpf VARCHAR(12))
+    RETURNS VARCHAR(100)
+    	LANGUAGE SQL
+    BEGIN
+		DECLARE result VARCHAR(100);
+
+		IF(SELECT LENGTH(cpf) != 11) THEN
+			SET result = (SELECT CONCAT(Erro.codigo, ' | ', Erro.significado) FROM Erro WHERE Erro.codigo = -2);
+			RETURN result;
+
+		ELSEIF((id = '') || (nome = "") || (data_nascimento = "") || (data_nascimento = "0000-00-00") || (cpf = "")) THEN
+			SET result = (SELECT CONCAT(Erro.codigo, ' | ', Erro.significado) FROM Erro WHERE Erro.codigo = -1);
+			RETURN result;
+
+		ELSE
+			SET result = (SELECT CONCAT(Erro.codigo, ' | ', Erro.significado) FROM Erro WHERE Erro.codigo = 0);
+			RETURN result;
+
+		END IF;
+    END;
+$$ DELIMITER ;
+
+
+/*------ CRIAÇÃO DA FUNCTION VERIFICAR CAMPOS CNH ------*/
+DROP FUNCTION IF EXISTS VerificarCamposCNH;
+DELIMITER $$
+    CREATE FUNCTION VerificarCamposCNH(id INT, data_cnh DATE, numero VARCHAR(11), id_pessoa INT)
+    RETURNS VARCHAR(100)
+    	LANGUAGE SQL
+    BEGIN
+		DECLARE result VARCHAR(100);
+
+		IF(SELECT LENGTH(numero) != 10) THEN
+			SET result = (SELECT CONCAT(Erro.codigo, ' | ', Erro.significado) FROM Erro WHERE Erro.codigo = -2);
+			RETURN result;
+
+		ELSEIF((id = '') || (data_cnh = "") || (data_cnh = "0000-00-00") || (numero = "") || (id_pessoa = "")) THEN
+			SET result = (SELECT CONCAT(Erro.codigo, ' | ', Erro.significado) FROM Erro WHERE Erro.codigo = -1);
+			RETURN result;
+
+		ELSE
+			SET result = (SELECT CONCAT(Erro.codigo, ' | ', Erro.significado) FROM Erro WHERE Erro.codigo = 0);
+			RETURN result;
+
+		END IF;
+    END;
+$$ DELIMITER ;
+
+
+/*------ CRIAÇÃO DA FUNCTION INSERIR PESSOA ------*/
+DROP FUNCTION IF EXISTS inserirPessoa;
+DELIMITER $$
+    CREATE FUNCTION inserirPessoa(novo_nome VARCHAR(40), nova_data DATE, novo_cpf VARCHAR(15))
+    RETURNS VARCHAR(100)
+    	LANGUAGE SQL
+    BEGIN
+		DECLARE result VARCHAR(100);
+
+		IF(SELECT LENGTH(novo_cpf) != 11) THEN
+			SET result = (SELECT CONCAT(Erro.codigo, ' | ', Erro.significado) FROM Erro WHERE Erro.codigo = -2);
+			RETURN result;
+
+		ELSEIF((novo_nome = "") || (nova_data = "") || (nova_data = "0000-00-00") || (novo_cpf = "")) THEN
+			SET result = (SELECT CONCAT(Erro.codigo, ' | ', Erro.significado) FROM Erro WHERE Erro.codigo = -1);
+			RETURN result;
+
+		ELSE
+			INSERT INTO Pessoa(nome, data_nascimento, cpf) VALUES (novo_nome, nova_data, novo_cpf);
+			SET result = (SELECT CONCAT(Erro.codigo, ' | ', Erro.significado) FROM Erro WHERE Erro.codigo = 0);
+			RETURN result;
+
+		END IF;
+    END;
+$$ DELIMITER ;
+
+
+/*------ CRIAÇÃO DA FUNCTION INSERIR CNH ------*/
+DROP FUNCTION IF EXISTS inserirCNH;
+DELIMITER $$
+    CREATE FUNCTION inserirCNH( nova_data DATE, novo_numero VARCHAR(11), novo_id INT)
+    RETURNS VARCHAR(100)
+    	LANGUAGE SQL
+    BEGIN
+		DECLARE result VARCHAR(100);
+
+		IF(SELECT LENGTH(novo_numero) != 10) THEN
+			SET result = (SELECT CONCAT(Erro.codigo, ' | ', Erro.significado) FROM Erro WHERE Erro.codigo = -2);
+			RETURN result;
+
+		ELSEIF( (nova_data = "") || (nova_data = "0000-00-00") || (novo_numero = "") || (novo_id = "") ) THEN
+			SET result = (SELECT CONCAT(Erro.codigo, ' | ', Erro.significado) FROM Erro WHERE Erro.codigo = -1);
+			RETURN result;
+
+		ELSE
+			INSERT INTO CNH(data_vencimento, numero_cnh, id_pessoa) VALUES (nova_data, novo_numero, novo_id);
+			SET result = (SELECT CONCAT(Erro.codigo, ' | ', Erro.significado) FROM Erro WHERE Erro.codigo = 0);
+			RETURN result;
+
+		END IF;
+    END;
+$$ DELIMITER ;
+
+
 /*------ ESCOPO DA CHAMADA DAS PROCEDURES DE INSERSÃO DE REGISTROS ------*/
 CALL sp_InserePessoa(/*Nome*/"", /*Data_Nascimento*/"2000-09-08", /*CPF*/"54334554334");
 CALL sp_InsereCNH(/*Data_vencimento*/"", /*Numero CNH*/"", /*Id Pessoa*/"");
@@ -190,28 +297,16 @@ CALL sp_AlteraCNH(/*Id Pessoa*/"3", /*Data_vencimento*/"2015-05-25", /*Numero CN
 CALL sp_ExcluirPessoa(/*Id Pessoa*/"7");
 CALL sp_ExcluirCNH(/*Id Pessoa*/"3");
 
-
-/*------ CRIAÇÃO DA FUNCTION VERIFICAR CAMPOS PESSOA ------*/
-DROP FUNCTION IF EXISTS VerificarCamposPessoa;
-DELIMITER $$
-    CREATE FUNCTION VerificarCamposPessoa(id INT, nome VARCHAR(40), data_nascimento DATE, cpf VARCHAR(11))
-    RETURNS VARCHAR(100)
-    	LANGUAGE SQL
-    BEGIN
-		DECLARE result VARCHAR(100);
-
-		IF((id = '') || (nome = "") || (data_nascimento = "") || (cpf = "")) THEN
-			SET result = (SELECT CONCAT(Erro.codigo, ' | ', Erro.significado) FROM Erro WHERE Erro.codigo = -1);
-			RETURN result;
-
-		ELSE
-			SET result = (SELECT CONCAT(Erro.codigo, ' | ', Erro.significado) FROM Erro WHERE Erro.codigo = 0);
-			RETURN result;
-
-		END IF;
-    END;
-$$ DELIMITER ;
-
 /*------ CHAMADA DA FUNCTION VERIFICAR CAMPOS PESSOA ------*/ 
 SELECT VerificarCamposPessoa(1, "","1777-04-30", "91861741711");
 SELECT VerificarCamposPessoa(1, "Carl Friedrich Gauss","1777-04-30", "91861741711");
+
+/*------ CHAMADA DA FUNCTION VERIFICAR CAMPOS CNH ------*/ 
+SELECT VerificarCamposCNH(2, "2014-04-19", "111111111", 1);
+SELECT VerificarCamposCNH(2, "", "111111111", 1);
+
+/*------ CHAMADA DA FUNCTION INSERIR PESSOA ------ */
+SELECT inserirPessoa("Jack Kill", "1994-02-21", "18456978456");
+
+/*------ CHAMADA DA FUNCTION INSERIR CNH ------ */
+SELECT inserirCNH("2014-11-05", "1238467899", 1);
