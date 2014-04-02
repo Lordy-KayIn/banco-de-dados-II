@@ -425,7 +425,60 @@ DELIMITER $$
     END;
 $$ DELIMITER ;
 
-SELECT AlteraCNH(7, "1010-10-10", "8484848484");
+
+/*------ CRIAÇÃO DA FUNCTION PARA EXCLUSÃO DE DADOS NA TABELA PESSOA ------*/
+DROP FUNCTION IF EXISTS DeletarPessoa;
+DELIMITER $$
+    CREATE FUNCTION DeletarPessoa(id_atual INT)
+    RETURNS VARCHAR(100)
+    	LANGUAGE SQL
+    BEGIN
+		DECLARE result VARCHAR(100);
+
+		IF( (SELECT COUNT(*) FROM pessoa WHERE pessoa.id = id_atual) != 1) THEN
+			SET result = ( SELECT TipoErro(-3) );
+			RETURN result;
+
+		ELSEIF(id_atual = "") THEN
+			SET result = ( SELECT TipoErro(-1) );
+			RETURN result;
+		
+		ELSE
+			DELETE FROM Pessoa WHERE pessoa.id = id_atual;
+			SET result = ( SELECT TipoErro(0) );
+			RETURN result;
+
+		END IF;
+    END;
+$$ DELIMITER ;
+
+
+/*------ CRIAÇÃO DA FUNCTION PARA EXCLUSÃO DE DADOS NA TABELA CNH ------*/
+DROP FUNCTION IF EXISTS DeletarCNH;
+DELIMITER $$
+    CREATE FUNCTION DeletarCNH(id_atual INT)
+    RETURNS VARCHAR(100)
+    	LANGUAGE SQL
+    BEGIN
+		DECLARE result VARCHAR(100);
+
+		IF( (SELECT COUNT(*) FROM pessoa WHERE pessoa.id = id_atual) != 1) THEN
+			SET result = ( SELECT TipoErro(-3) );
+			RETURN result;
+
+		ELSEIF(id_atual = "") THEN
+			SET result = ( SELECT TipoErro(-1) );
+			RETURN result;
+		
+		ELSE
+			DELETE FROM cnh WHERE cnh.id_pessoa = id_atual;
+			SET result = ( SELECT TipoErro(0) );
+			RETURN result;
+
+		END IF;
+    END;
+$$ DELIMITER ;
+
 
 /*------ CRIAÇÃO DA PROCEDURE COM FUNCTION PARA INSERÇÃO DE DADOS NA TABELA Pessoa ------*/
 DROP PROCEDURE IF EXISTS spf_InserePessoa;
