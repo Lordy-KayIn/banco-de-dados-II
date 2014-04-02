@@ -527,6 +527,18 @@ BEGIN
 END $$
 DELIMITER ;
 
+/*------ CRIAÇÃO DA PROCEDURE COM FUNCTION PARA DELETAR DE DADOS NA TABELA PESSOA ------*/
+DROP PROCEDURE IF EXISTS spf_DeletarPessoa;
+DELIMITER $$
+CREATE PROCEDURE spf_DeletarPessoa(IN id_atual INT)
+BEGIN
+	
+	SELECT DeletarCNH(id_atual);
+	SELECT DeletarPessoa(id_atual);
+
+END $$
+DELIMITER ;
+
 
 /*------ ESCOPO DA CHAMADA DAS PROCEDURES DE INSERSÃO DE REGISTROS ------*/
 CALL sp_InserePessoa(/*Nome*/"", /*Data_Nascimento*/"2000-09-08", /*CPF*/"54334554334");
