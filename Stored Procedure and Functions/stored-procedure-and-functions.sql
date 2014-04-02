@@ -556,16 +556,13 @@ CALL sp_AlteraCNH(/*Id Pessoa*/"3", /*Data_vencimento*/"2015-05-25", /*Numero CN
 CALL sp_ExcluirPessoa(/*Id Pessoa*/"7");
 CALL sp_ExcluirCNH(/*Id Pessoa*/"3");
 
-/*------ CHAMADA DA FUNCTION VERIFICAR CAMPOS PESSOA ------*/ 
-SELECT VerificarCamposPessoa(1, "","1777-04-30", "91861741711");
-SELECT VerificarCamposPessoa(1, "Carl Friedrich Gauss","1777-04-30", "91861741711");
+/*------ ESCOPO DA CHAMADA DAS PROCEDURES DE INSERSÃO DE REGISTROS COM FUNCTIONS ------*/
+CALL spf_InserePessoa(/*Nome*/"", /*Data_Nascimento*/"2000-09-08", /*CPF*/"54334554334");
+CALL spF_InsereCNH(/*Data_vencimento*/"2015-05-25", /*Numero CNH*/"1485965874", /*Id Pessoa*/"11");
 
-/*------ CHAMADA DA FUNCTION VERIFICAR CAMPOS CNH ------*/ 
-SELECT VerificarCamposCNH(2, "2014-04-19", "111111111", 1);
-SELECT VerificarCamposCNH(2, "", "111111111", 1);
+/*------ ESCOPO DA CHAMADA DAS PROCEDURES DE ALTERAÇÃO DE REGISTROS COM FUNCTIONS ------*/
+CALL spf_AlteraPessoa(/*Id Pessoa*/"11", /*Nome*/"Luiz Alberto Binda Venturote", /*Data_Nascimento*/"1995-07-04", /*CPF*/"15298781211");
+CALL spf_AlteraCNH(/*Id Pessoa*/"11", /*Data_vencimento*/"2015-05-25", /*Numero CNH*/"14425637891");
 
-/*------ CHAMADA DA FUNCTION INSERIR PESSOA ------ */
-SELECT inserirPessoa("Jack Kill", "1994-02-21", "18456978456");
-
-/*------ CHAMADA DA FUNCTION INSERIR CNH ------ */
-SELECT inserirCNH("2014-11-05", "1238467899", 1);
+/*------ ESCOPO DA CHAMADA DAS PROCEDURES DE EXCLUSÃO DE REGISTROS COM FUNCTIONS ------*/
+CALL spf_ExcluirPessoa(/*Id Pessoa*/"11");
