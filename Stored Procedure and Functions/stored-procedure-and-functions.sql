@@ -53,129 +53,6 @@ INSERT INTO Erro VALUES("-2", "Valor errado!");
 INSERT INTO Erro VALUES("-3", "Registro não existe na tabela");
 
 
-/*------ CRIAÇÃO DA PROCEDURE PARA INSERÇÃO DE DADOS NA TABELA Pessoa ------*/
-DELIMITER $$
-CREATE PROCEDURE sp_InserePessoa(IN novo_nome VARCHAR(40), IN nova_data DATE, IN novo_cpf VARCHAR(11))
-BEGIN 
-	IF(SELECT LENGTH(novo_cpf) != '11') THEN
-		SELECT "Código -2 | VALOR ERRADO!" AS Msg_valor_errado;
-
-	ELSEIF((novo_nome !='') && (nova_data !="0000-00-00") && (novo_cpf !='')) THEN
-		INSERT INTO Pessoa(nome, data_nascimento, cpf) VALUES (novo_nome, nova_data, novo_cpf);
-		SELECT "Código 0 | OPERAÇÃO OK!" AS Msg_sucesso;
-	
-	ELSEIF((novo_nome = '') || (nova_data = "0000-00-00") || (novo_cpf = '')) THEN 
-		SELECT "Código -1 | CAMPO(S) OBRIGATÓRIO(S) EM BRANCO NO REGISTRO" AS Msg_erro_campo;
-	
-	END IF;
-END $$
-DELIMITER ;
-
-
-/*------ CRIAÇÃO DA PROCEDURE PARA INSERÇÃO DE DADOS NA TABELA CNH ------*/
-DELIMITER $$
-CREATE PROCEDURE sp_InsereCNH(IN nova_data DATE, IN novo_numero VARCHAR(10), IN novo_id INT)
-BEGIN 
-	IF(SELECT LENGTH(novo_numero) != '10') THEN
-		SELECT "Código -2 | VALOR ERRADO!" AS Msg_valor_errado;
-
-	ELSEIF((nova_data != "0000-00-00") && (novo_numero != '') && (novo_id != '')) THEN
-		INSERT INTO CNH(data_vencimento, numero_cnh, id_pessoa) VALUES (nova_data, novo_numero, novo_id);
-		SELECT "Código 0 | OPERAÇÃO OK!" AS Msg_sucesso;
-	
-	ELSEIF((nova_data = "0000-00-00") || (novo_numero = '') || (novo_id = '')) THEN 
-		SELECT "Código -1 | CAMPO(S) OBRIGATÓRIO(S) EM BRANCO NO REGISTRO" AS Msg_erro_campo;
-		
-	END IF;
-END $$
-DELIMITER ;
-
-
-/*------ CRIAÇÃO DA PROCEDURE PARA ALTERAÇÃO DE DADOS NA TABELA PESSOA ------*/
-DELIMITER $$
-CREATE PROCEDURE sp_AlteraPessoa(IN id_atual INT, IN novo_nome VARCHAR(40), IN nova_data DATE, IN novo_cpf VARCHAR(11))
-BEGIN
-	IF(SELECT LENGTH(novo_cpf) != '11') THEN
-		SELECT "Código -2 | VALOR ERRADO!" AS Msg_valor_errado;
-	
-	ELSEIF((SELECT Pessoa.id FROM Pessoa WHERE id_atual = Pessoa.id) && (id_atual != '') && (novo_nome != '') && (nova_data != "0000-00-00") && (novo_cpf != '')) THEN 
-			UPDATE Pessoa, CNH SET Pessoa.nome=novo_nome, Pessoa.data_nascimento=nova_data, Pessoa.cpf=novo_cpf WHERE Pessoa.id=CNH.id_Pessoa AND id_atual = Pessoa.id;
-			SELECT "Código 0 | OPERAÇÃO OK!" AS Msg_sucesso;
-
-	ELSEIF((id_atual = '') || (novo_nome = '') || (nova_data = "0000-00-00") || (novo_cpf = '' )) THEN 
-		SELECT "Código -1 | CAMPO(S) OBRIGATÓRIO(S) EM BRANCO NO REGISTRO" AS Msg_erro_campo;
-	
-	ELSEIF(SELECT Pessoa.id FROM Pessoa, CNH WHERE id_atual != Pessoa.id LIMIT 1) THEN
-		SELECT "Código -3 | REGISTRO NÃO EXISTE NA TABELA" AS Msg_sem_registo;
-		
-	END IF;
-END $$
-DELIMITER ;
-
-
-/*------ CRIAÇÃO DA PROCEDURE PARA ALTERAÇÃO DE DADOS NA TABELA CNH ------*/
-DELIMITER $$
-CREATE PROCEDURE sp_AlteraCNH(IN id_atual INT, IN nova_data DATE, IN novo_numero VARCHAR(10))
-BEGIN 
-	
-	IF(SELECT LENGTH(novo_numero) != '10') THEN
-		SELECT "Código -2 | VALOR ERRADO!" AS Msg_valor_errado;
-
-	ELSEIF((id_atual != '') && (nova_data != "0000-00-00") && (novo_numero != '')) THEN
-		UPDATE CNH, Pessoa SET CNH.data_vencimento = nova_data, CNH.numero_cnh = novo_numero WHERE Pessoa.id=CNH.id_Pessoa AND id_atual = Pessoa.id;
-		SELECT "Código 0 | OPERAÇÃO OK!" AS Msg_sucesso;
-	
-	ELSEIF((id_atual = '') || (nova_data = '') || (nova_data = "0000-00-00")) THEN 
-		SELECT "Código -1 | CAMPO(S) OBRIGATÓRIO(S) EM BRANCO NO REGISTRO" AS Msg_erro_campo;
-
-	ELSEIF(SELECT CNH.id FROM Pessoa, CNH WHERE id_atual != CNH.id_pessoa LIMIT 1) THEN
-		SELECT "Código -3 | REGISTRO NÃO EXISTE NA TABELA" AS Msg_sem_registo;
-	
-	END IF;
-END $$ 
-DELIMITER ;
-
-
-/*------ CRIAÇÃO DA PROCEDURE PARA EXCLUSÃO DE DADOS NA TABELA Pessoa ------*/
-DELIMITER $$
-
-CREATE PROCEDURE sp_ExcluirPessoa(IN id_atual INT)
-BEGIN 
-	IF((id_atual != '') && (SELECT Pessoa.id FROM Pessoa WHERE id_atual = Pessoa.id )) THEN 
-		DELETE FROM Pessoa WHERE Pessoa.id = id_atual;/* Talvez seja interesante retirar a Cláusula Where, depois te explico a OBS*/
-		SELECT "Código 0 | OPERAÇÃO OK!" AS Msg_sucesso;
-	
-	ELSEIF(id_atual = '') THEN 
-		SELECT "Código -1 | CAMPO(S) OBRIGATÓRIO(S) EM BRANCO NO REGISTRO" AS Msg_erro_campo;
-	
-	ELSEIF(SELECT Pessoa.id FROM Pessoa WHERE id_atual != Pessoa.id LIMIT 1) THEN
-		SELECT "Código -3 | REGISTRO NÃO EXISTE NA TABELA" AS Msg_sem_registo;
-		
-	END IF;
-END $$  
-DELIMITER ;
-
-
-/*------ CRIAÇÃO DA PROCEDURE PARA EXCLUSÃO DE DADOS NA TABELA CNH ------*/
-DELIMITER $$
-
-CREATE PROCEDURE sp_ExcluirCNH(IN id_atual INT)
-BEGIN 
-	IF((id_atual != '') && (SELECT CNH.id_pessoa FROM CNH WHERE id_atual = CNH.id_pessoa )) THEN 
-		DELETE FROM CNH WHERE CNH.id_pessoa = id_atual;/* Talvez seja interesante retirar a Cláusula Where, depois te explico a OBS*/
-		SELECT "Código 0 | OPERAÇÃO OK!" AS Msg_sucesso;
-	
-	ELSEIF(id_atual = '') THEN 
-		SELECT "Código -1 | CAMPO(S) OBRIGATÓRIO(S) EM BRANCO NO REGISTRO" AS Msg_erro_campo;
-	
-	ELSEIF(SELECT CNH.id_pessoa FROM CNH WHERE id_atual != CNH.id_pessoa LIMIT 1) THEN
-		SELECT "Código -3 | REGISTRO NÃO EXISTE NA TABELA" AS Msg_sem_registo;
-		
-	END IF;
-END $$  
-DELIMITER ;
-
-
 /*------ CRIAÇÃO DA FUNCTION TIPO DE ERRO ------*/
 DROP FUNCTION IF EXISTS TipoErro;
 DELIMITER $$
@@ -478,6 +355,133 @@ DELIMITER $$
 		END IF;
     END;
 $$ DELIMITER ;
+
+
+/*------ CRIAÇÃO DA PROCEDURE PARA INSERÇÃO DE DADOS NA TABELA Pessoa ------*/
+DROP FUNCTION IF EXISTS sp_InserePessoa;
+DELIMITER $$
+CREATE PROCEDURE sp_InserePessoa(IN novo_nome VARCHAR(40), IN nova_data DATE, IN novo_cpf VARCHAR(11))
+BEGIN 
+	IF(SELECT LENGTH(novo_cpf) != '11') THEN
+		SELECT "Código -2 | VALOR ERRADO!" AS Msg_valor_errado;
+
+	ELSEIF((novo_nome !='') && (nova_data !="0000-00-00") && (novo_cpf !='')) THEN
+		INSERT INTO Pessoa(nome, data_nascimento, cpf) VALUES (novo_nome, nova_data, novo_cpf);
+		SELECT "Código 0 | OPERAÇÃO OK!" AS Msg_sucesso;
+	
+	ELSEIF((novo_nome = '') || (nova_data = "0000-00-00") || (novo_cpf = '')) THEN 
+		SELECT "Código -1 | CAMPO(S) OBRIGATÓRIO(S) EM BRANCO NO REGISTRO" AS Msg_erro_campo;
+	
+	END IF;
+END $$
+DELIMITER ;
+
+
+/*------ CRIAÇÃO DA PROCEDURE PARA INSERÇÃO DE DADOS NA TABELA CNH ------*/
+DROP FUNCTION IF EXISTS sp_InsereCNH;
+DELIMITER $$
+CREATE PROCEDURE sp_InsereCNH(IN nova_data DATE, IN novo_numero VARCHAR(10), IN novo_id INT)
+BEGIN 
+	IF(SELECT LENGTH(novo_numero) != '10') THEN
+		SELECT "Código -2 | VALOR ERRADO!" AS Msg_valor_errado;
+
+	ELSEIF((nova_data != "0000-00-00") && (novo_numero != '') && (novo_id != '')) THEN
+		INSERT INTO CNH(data_vencimento, numero_cnh, id_pessoa) VALUES (nova_data, novo_numero, novo_id);
+		SELECT "Código 0 | OPERAÇÃO OK!" AS Msg_sucesso;
+	
+	ELSEIF((nova_data = "0000-00-00") || (novo_numero = '') || (novo_id = '')) THEN 
+		SELECT "Código -1 | CAMPO(S) OBRIGATÓRIO(S) EM BRANCO NO REGISTRO" AS Msg_erro_campo;
+		
+	END IF;
+END $$
+DELIMITER ;
+
+
+/*------ CRIAÇÃO DA PROCEDURE PARA ALTERAÇÃO DE DADOS NA TABELA PESSOA ------*/
+DROP FUNCTION IF EXISTS sp_AlteraPessoa;
+DELIMITER $$
+CREATE PROCEDURE sp_AlteraPessoa(IN id_atual INT, IN novo_nome VARCHAR(40), IN nova_data DATE, IN novo_cpf VARCHAR(11))
+BEGIN
+	IF(SELECT LENGTH(novo_cpf) != '11') THEN
+		SELECT "Código -2 | VALOR ERRADO!" AS Msg_valor_errado;
+	
+	ELSEIF((SELECT Pessoa.id FROM Pessoa WHERE id_atual = Pessoa.id) && (id_atual != '') && (novo_nome != '') && (nova_data != "0000-00-00") && (novo_cpf != '')) THEN 
+			UPDATE Pessoa, CNH SET Pessoa.nome=novo_nome, Pessoa.data_nascimento=nova_data, Pessoa.cpf=novo_cpf WHERE Pessoa.id=CNH.id_Pessoa AND id_atual = Pessoa.id;
+			SELECT "Código 0 | OPERAÇÃO OK!" AS Msg_sucesso;
+
+	ELSEIF((id_atual = '') || (novo_nome = '') || (nova_data = "0000-00-00") || (novo_cpf = '' )) THEN 
+		SELECT "Código -1 | CAMPO(S) OBRIGATÓRIO(S) EM BRANCO NO REGISTRO" AS Msg_erro_campo;
+	
+	ELSEIF(SELECT Pessoa.id FROM Pessoa, CNH WHERE id_atual != Pessoa.id LIMIT 1) THEN
+		SELECT "Código -3 | REGISTRO NÃO EXISTE NA TABELA" AS Msg_sem_registo;
+		
+	END IF;
+END $$
+DELIMITER ;
+
+
+/*------ CRIAÇÃO DA PROCEDURE PARA ALTERAÇÃO DE DADOS NA TABELA CNH ------*/
+DROP FUNCTION IF EXISTS sp_AlteraCNH;
+DELIMITER $$
+CREATE PROCEDURE sp_AlteraCNH(IN id_atual INT, IN nova_data DATE, IN novo_numero VARCHAR(10))
+BEGIN 
+	
+	IF(SELECT LENGTH(novo_numero) != '10') THEN
+		SELECT "Código -2 | VALOR ERRADO!" AS Msg_valor_errado;
+
+	ELSEIF((id_atual != '') && (nova_data != "0000-00-00") && (novo_numero != '')) THEN
+		UPDATE CNH, Pessoa SET CNH.data_vencimento = nova_data, CNH.numero_cnh = novo_numero WHERE Pessoa.id=CNH.id_Pessoa AND id_atual = Pessoa.id;
+		SELECT "Código 0 | OPERAÇÃO OK!" AS Msg_sucesso;
+	
+	ELSEIF((id_atual = '') || (nova_data = '') || (nova_data = "0000-00-00")) THEN 
+		SELECT "Código -1 | CAMPO(S) OBRIGATÓRIO(S) EM BRANCO NO REGISTRO" AS Msg_erro_campo;
+
+	ELSEIF(SELECT CNH.id FROM Pessoa, CNH WHERE id_atual != CNH.id_pessoa LIMIT 1) THEN
+		SELECT "Código -3 | REGISTRO NÃO EXISTE NA TABELA" AS Msg_sem_registo;
+	
+	END IF;
+END $$ 
+DELIMITER ;
+
+
+/*------ CRIAÇÃO DA PROCEDURE PARA EXCLUSÃO DE DADOS NA TABELA Pessoa ------*/
+DROP FUNCTION IF EXISTS sp_ExcluirPessoa;
+DELIMITER $$
+CREATE PROCEDURE sp_ExcluirPessoa(IN id_atual INT)
+BEGIN 
+	IF((id_atual != '') && (SELECT Pessoa.id FROM Pessoa WHERE id_atual = Pessoa.id )) THEN 
+		DELETE FROM Pessoa WHERE Pessoa.id = id_atual;
+		SELECT "Código 0 | OPERAÇÃO OK!" AS Msg_sucesso;
+	
+	ELSEIF(id_atual = '') THEN 
+		SELECT "Código -1 | CAMPO(S) OBRIGATÓRIO(S) EM BRANCO NO REGISTRO" AS Msg_erro_campo;
+	
+	ELSEIF(SELECT Pessoa.id FROM Pessoa WHERE id_atual != Pessoa.id LIMIT 1) THEN
+		SELECT "Código -3 | REGISTRO NÃO EXISTE NA TABELA" AS Msg_sem_registo;
+		
+	END IF;
+END $$  
+DELIMITER ;
+
+
+/*------ CRIAÇÃO DA PROCEDURE PARA EXCLUSÃO DE DADOS NA TABELA CNH ------*/
+DROP PROCEDURE IF EXISTS sp_ExcluirCNH;
+DELIMITER $$
+CREATE PROCEDURE sp_ExcluirCNH(IN id_atual INT)
+BEGIN 
+	IF((id_atual != '') && (SELECT CNH.id_pessoa FROM CNH WHERE id_atual = CNH.id_pessoa )) THEN 
+		DELETE FROM CNH WHERE CNH.id_pessoa = id_atual;
+		SELECT "Código 0 | OPERAÇÃO OK!" AS Msg_sucesso;
+	
+	ELSEIF(id_atual = '') THEN 
+		SELECT "Código -1 | CAMPO(S) OBRIGATÓRIO(S) EM BRANCO NO REGISTRO" AS Msg_erro_campo;
+	
+	ELSEIF(SELECT CNH.id_pessoa FROM CNH WHERE id_atual != CNH.id_pessoa LIMIT 1) THEN
+		SELECT "Código -3 | REGISTRO NÃO EXISTE NA TABELA" AS Msg_sem_registo;
+		
+	END IF;
+END $$  
+DELIMITER ;
 
 
 /*------ CRIAÇÃO DA PROCEDURE COM FUNCTION PARA INSERÇÃO DE DADOS NA TABELA Pessoa ------*/
