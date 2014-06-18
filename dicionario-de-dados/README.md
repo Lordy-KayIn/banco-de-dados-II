@@ -24,8 +24,19 @@ Para criar um dicionário de dados no MySQL Workbench a partir do modelo MRN voc
 ## Dicionário de Dados ##
 
 ### aluno ###
-| CAMPO | TIPO | NULO | EXTRA | COMENTARIOS |
-|---|---|---|---|---|
-|   |   |   |   |   |
-|   |   |   |   |   |
-|   |   |   |   |   |
+|    CAMPO   | TIPO        | NULO | EXTRA          | COMENTARIOS                  |
+|------------|-------------|------|----------------|------------------------------|
+| id         | INT         | NO   | AUTO_INCREMENT |                              |    
+| nome       | VARCHAR(45) | NO   |	               |                              |	
+| nascimento |	DATE       | SI   |	               | Data de nascimento do aluno. |
+| email      | VARCHAR(30) | SI   |	               |                              |	
+| endereço   | VARCHAR(50) | SI   |	               |                              |	
+| turma_id   | INT         | NO   |                |                              |	
+
+
+### turma ###
+|    CAMPO   | TIPO        | NULO | EXTRA          | COMENTARIOS                  |
+|------------|-------------|------|----------------|------------------------------|
+| id	     | INT	       | NO	  |                |                              |
+| nome	     | VARCHAR(5)  | NO	  |                | Nome da turma.               |
+| ano	     | INT	       | SI	  |                | Ano inicial da turma.        |

@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml"> 
+<head> 
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+<title>DBdoc</title> 
+</head> 
+<style type="text/css"> 
+	table {width: 100%; border-collapse: collapse;} 
+	table, td, th {border: 1px solid black;} 
+</style> 
+<body> 
+<h1>mydb</h1> 
+<ol> 
+<li><a href="#aluno">aluno</a> (6 campos)</li><li><a href="#turma">turma</a> (3 campos)</li></ol> 
+<ol> 
+<li id="aluno"> 
+<h2>aluno</h2> 
+<p></p> 
+<table> 
+<tr> 
+<th>CAMPO</th> 
+<th>TIPO</th> 
+<th>NULO</th> 
+<th>EXTRA</th> 
+<th>COMENTARIOS</th> 
+</tr> 
+<tr> 
+   <td>id</td> 
+   <td>INT</td> 
+    <td>NO</td> 
+    <td>AUTO_INCREMENT</td> 
+    <td></td> 
+</tr> 
+<tr> 
+   <td>nome</td> 
+   <td>VARCHAR(45)</td> 
+    <td>NO</td> 
+    <td> - </td> 
+    <td></td> 
+</tr> 
+<tr> 
+   <td>nascimento</td> 
+   <td>DATE</td> 
+    <td>SI</td> 
+    <td> - </td> 
+    <td>Data de nascimento do aluno.</td> 
+</tr> 
+<tr> 
+   <td>email</td> 
+   <td>VARCHAR(30)</td> 
+    <td>SI</td> 
+    <td> - </td> 
+    <td></td> 
+</tr> 
+<tr> 
+   <td>endereço</td> 
+   <td>VARCHAR(50)</td> 
+    <td>SI</td> 
+    <td> - </td> 
+    <td></td> 
+</tr> 
+<tr> 
+   <td>turma_id</td> 
+   <td>INT</td> 
+    <td>NO</td> 
+    <td> - </td> 
+    <td></td> 
+</tr> 
+</table> 
+</li> 
+<li id="turma"> 
+<h2>turma</h2> 
+<p></p> 
+<table> 
+<tr> 
+<th>CAMPO</th> 
+<th>TIPO</th> 
+<th>NULO</th> 
+<th>EXTRA</th> 
+<th>COMENTARIOS</th> 
+</tr> 
+<tr> 
+   <td>id</td> 
+   <td>INT</td> 
+    <td>NO</td> 
+    <td> - </td> 
+    <td></td> 
+</tr> 
+<tr> 
+   <td>nome</td> 
+   <td>VARCHAR(5)</td> 
+    <td>NO</td> 
+    <td> - </td> 
+    <td>Nome da turma.</td> 
+</tr> 
+<tr> 
+   <td>ano</td> 
+   <td>INT</td> 
+    <td>SI</td> 
+    <td> - </td> 
+    <td>Ano inicial da turma.</td> 
+</tr> 
+</table> 
+</li> 
+</ol> 
+</body> 
+</html>
