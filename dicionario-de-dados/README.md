@@ -20,3 +20,12 @@ Para criar um dicionário de dados no MySQL Workbench a partir do modelo MRN voc
 
 ## SQL ##
 [Script SQL do banco](https://github.com/luizventurote/banco-de-dados-II/blob/master/dicionario-de-dados/exemplo/Script.sql)
+
+## Dicionário de Dados ##
+
+### aluno ###
+| CAMPO | TIPO | NULO | EXTRA | COMENTARIOS |
+|---|---|---|---|---|
+|   |   |   |   |   |
+|   |   |   |   |   |
+|   |   |   |   |   |
