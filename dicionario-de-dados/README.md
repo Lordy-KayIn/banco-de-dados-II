@@ -57,6 +57,53 @@ O termo INFORMATION_SCHEMA descreve a interface padrão ANSI para os metadados d
 
 Desta forma, as tabelas INFORMATION_SCHEMA são mais parecidas com views do que tabelas.
 
+Embora você possa selecionar INFORMATION_SCHEMA como o banco de dados padrão com uma declaração de uso, você pode apenas ler o conteúdo das tabelas, não executar INSERT, UPDATE, ou DELETE operações sobre eles.
+
+### Exemplos do uso do INFORMATION_SCHEMA ###
+```
+SELECT table_name, table_type, engine FROM information_schema.tables;
+```
+
+Verifica os privilégios atribuídos a um usuário no MySQL
+```
+SELECT grantee, privilege_type FROM INFORMATION_SCHEMA.USER_PRIVILEGES; 
+```
+
+Verifica os nomes das tabelas de um determinado esquema(schema) e o tipo de tabela no MySQL
+```
+SELECT table_name, table_type, engine FROM INFORMATION_SCHEMA.TABLES WHERE table_schema = 'sakila';
+```
+
+Verifica as sessões que estão em execução e em espera no MySQL
+```
+SELECT id, user, host, db, state FROM INFORMATION_SCHEMA.PROCESSLIST;
+```
+
+Verifica os esquemas(schemas) existentes no MySQL
+```
+SELECT schema_name FROM INFORMATION_SCHEMA.SCHEMATA;
+```
+Verifica o nome de um esquema(schema), tamanho deste esquema(schema) em megabytes e espaço livre no MySQL
+```
+SELECT table_schema AS 'Nome do Banco de Dados',  Round( Sum( data_length + index_length ) / 1024 / 1024, 3 ) AS 'Tamanho Armazenado (MB)',  Round( Sum( data_free ) / 1024 / 1024, 3 ) AS 'Espaço Livre (MB)' FROM INFORMATION_SCHEMA.TABLES GROUP BY table_schema ;
+```
+
+Verifica o collation e character-set utilizado pelos esquemas(schemas) do MySQL:
+```
+SELECT schema_name, default_collation_name, default_character_set_name FROM INFORMATION_SCHEMA.SCHEMATA;
+```
+
+Também podemos utilizar funções fornecidas pelo MySQL que consultam as informações do information_schema. Segue abaixo algumas delas abaixo:
+```
+SHOW DATABASES; ou SHOW SCHEMAS;
+SHOW TABLES; 
+SHOW TABLE STATUS FROM `sakila`;
+SHOW FUNCTION STATUS WHERE `Db`='sakila';
+SHOW PROCEDURE STATUS WHERE `Db`='sakila';
+SHOW TRIGGERS FROM `sakila`;
+SHOW EVENTS FROM `sakila`;
+```
+
 ## Benefícios de uma interface padronizada ##
 Existem três principais vantagens para a interface INFORMATION_SCHEMA versus ao comando SHOW: 
 
@@ -249,19 +296,165 @@ SELECT * FROM INFORMATION_SCHEMA.ROUTINES;
 
 ### INFORMATION_SCHEMA.VIEWS ###
 
+A view INFORMATION_SCHEMA.VIEWS exibe informações sobre as views criadas no servidor.
+
+```
+DESCRIBE INFORMATION_SCHEMA.VIEWS;
+```
+```
+SELECT * FROM INFORMATION_SCHEMA.VIEWS
+```
+
+Campos contidos na view INFORMATION_SCHEMA.VIEWS:
+
+- **TABLE_CATALOG:** Sempre NULL. 
+- **TABLE_SCHEMA:** Base de dados em que a view opera. 
+- **TABLE_NAME:** Nome da view. 
+- **VIEW_DEFINITION:** definição completa da view. 
+CHECK_OPTION:** NONE, LOCAL, ou CASCADE.
+- **IS_UPDATABLE:** YES ou NO, dependendo se a view suporta atualização.
+
 ### INFORMATION_SCHEMA.CHARACTER_SETS ###
+
+A view INFORMATION_SCHEMA.CHARACTER_SETS mostra os conjuntos de caracteres disponíveis no servidor de banco de dados.
+
+```
+DESCRIBE INFORMATION_SCHEMA.CHARACTER_SETS;
+```
+```
+SELECT * FROM INFORMATION_SCHEMA.CHARACTER_SETS LIMIT 5;
+```
+
+Campos contidos em INFORMATION_SCHEMA.CHARACTER_SETS: 
+
+- **CHARACTER_SET_NAME:** Nome do conjunto de caracteres. 
+
+- **DEFAULT_COLLATION_NAME:** Nome do agrupamento padrão para este conjunto de caracteres. 
+
+- **DESCRIPTION:** Descrição do conjunto de caracteres. 
+
+- **MAXLEN:** Mostra o número de bytes usados ​​para armazenar um único caractere no conjunto.
 
 ### INFORMATION_SCHEMA.COLLATIONS ###
 
+A view INFORMATION_SCHEMA.COLLATIONS lista as collations disponíveis para o usuário atual.
+
+```
+DESCRIBE INFORMATION_SCHEMA.COLLATIONS;
+```
+```
+SELECT * FROM INFORMATION_SCHEMA.COLLATIONS LIMIT 5;
+```
+
+Campos contidos INFORMATION_SCHEMA.COLLATIONS: 
+
+• COLLATION_NAME: Nome da collation. 
+
+• CHARACTER_SET_NAME: Nome do conjunto de caracteres a que se aplica na collation. 
+
+• ID: Um identificador numérico para a collation. 
+
+• IS_DEFAULT: YES ou NO, que indica se a collation é a padrão do servidor. 
+
+• IS_COMPILED: YES ou em branco. Indica se o servidor foi compilado com esta collation. 
+
+• SORTLEN: mostra o número de bytes necessários na memória para executar a classificação na collation.
+
 ### INFORMATION_SCHEMA.COLLATION_CHARACTER_SET_APPLICABILITY ###
+
+A view INFORMATION_SCHEMA.COLLATION_CHARACTER_SET_APPLICABILITY mostra a relação entre os conjuntos de caracteres e as collations.
+
+```
+DESCRIBE INFORMATION_SCHEMA.COLLATION_CHARACTER_SET_APPLICABILITY;
+```
+```
+SELECT * FROM INFORMATION_SCHEMA.COLLATION_CHARACTER_SET_APPLICABILITY LIMIT 5;
+```
 
 ### INFORMATION_SCHEMA.SCHEMA_PRIVILEGES ###
 
+A view INFORMATION_SCHEMA.SCHEMA_PRIVILEGES abriga os privilégios do banco de dados no servidor. Esta view não está no padrão ANSI, e é fornecida para que uma interface comum a use para coletar informações da tabela do sistema mysql.db para privilégios associados ao banco de dados. Como o MySQL segue um nível separado de permissão no nível de banco de dados, essa view foi adicionada como um complemento para a TABLE_PRIVILEGES e para a view padrão COLUMN_PRIVILEGES.
+
+```
+DESCRIBE INFORMATION_SCHEMA.SCHEMA_PRIVILEGES;
+```
+```
+SELECT * FROM INFORMATION_SCHEMA.SCHEMA_PRIVILEGES LIMIT 5;
+```
+
+Campos contidos na INFORMATION_SCHEMA.SCHEMA_PRIVILEGES: 
+
+- **GRANTEE:** Mostra o formato 'user'@'host' para o usuário ter acesso ao banco de dados. 
+
+- **TABLE_CATALOG:** Sempre NULL. 
+
+- **TABLE_SCHEMA:** Mostra o banco de dados para que o usuário tenha sido concedido acesso. 
+
+- **PRIVILEGE_TYPE:** Qualquer um dos privilégios em MySQL lida com permissões de nível de banco de dados. 
+
+- **IS_GRANTABLE:** YES ou NO. Indica se a opção com GRANT foi utilizada na atribuição de permissões de acesso.
+
 ### INFORMATION_SCHEMA.USER_PRIVILEGES ###
+
+A view INFORMATION_SCHEMA.USER_PRIVILEGES não está no padrão ANSI. Ela mostra informações relativas aos privilégios globais dos usuários do sistema.
+
+```
+DESCRIBE INFORMATION_SCHEMA.USER_PRIVILEGES;
+```
+```
+SELECT * FROM INFORMATION_SCHEMA.USER_PRIVILEGES LIMIT 5;
+```
+
+Campos contidos INFORMATION_SCHEMA.USER_PRIVILEGES: 
+
+- **GRANTEE:** O formato 'user'@'host' para o usuário privilegiado. 
+
+- **TABLE_CATALOG:** Sempre NULL. 
+
+- **PRIVILEGE_TYPE:** Qualquer um dos tipos de privilégio padrão mundial MySQL. 
+
+- **IS_GRANTABLE:** YES ou NO. Foi este usuário o direito de atribuir privilégios semelhantes usando a opção WITH GRANT durante a criação?
 
 ### INFORMATION_SCHEMA.TABLE_PRIVILEGES ###
 
+A view INFORMATION_SCHEMA.TABLE_PRIVILEGES está no padrão ANSI. Ela exibe informações sobre os privilégios do MySQL no nível de tabela do usuário.
+
+```
+DESCRIBE INFORMATION_SCHEMA.TABLE_PRIVILEGES;
+```
+```
+SELECT * FROM INFORMATION_SCHEMA.TABLE_PRIVILEGES LIMIT 2;
+```
+
+Campos contidos INFORMATION_SCHEMA.TABLE_PRIVILEGES: 
+
+- **GRANTEE:** Usuário em um formato 'user'@'host'. 
+- **TABLE_CATALOG:** Sempre NULL. 
+- **TABLE_SCHEMA:** Nome da base de dados da tabela de habitação. 
+- **TABLE_NAME:** Nome da tabela. 
+- **PRIVILEGE_TYPE:** Qualquer um dos privilégios no nível de tabela MySQL disponíveis para o usuário. 
+- **IS_GRANTABLE:** YES ou NO, dependendo se a opção com GRANT foi utilizado na atribuição de privilégios.
+
 ### INFORMATION_SCHEMA.COLUMN_PRIVILEGES ###
+
+A view INFORMATION_SCHEMA.COLUMN_PRIVILEGES está no padrão ANSI e mostra informações no nível de acesso da coluna.
+
+```
+DESCRIBE INFORMATION_SCHEMA.COLUMN_PRIVILEGES;
+```
+```
+SELECT * FROM INFORMATION_SCHEMA.COLUMN_PRIVILEGES
+```
+
+Campos contidos INFORMATION_SCHEMA.COLUMN_PRIVILEGES: 
+
+- **GRANTEE:** O usuário no formato 'user'@'host'. 
+- **TABLE_CATALOG:** Sempre NULL. 
+- **TABLE_SCHEMA:** Nome da base de dados da tabela. 
+- **TABLE_NAME:** Nome da tabela. 
+- **COLUMN_NAME:** Nome da coluna. 
+- **PRIVILEGE_TYPE:** Qualquer um dos privilégios de coluna MySQL disponíveis para o usuário. 
+- **IS_GRANTABLE:** YES ou NO, dependendo se a opção com GRANT foi utilizado na atribuição de privilégios.
 
 ## Criando um dicionário de dados no MySQL Workbench ##
 Para criar um dicionário de dados no MySQL Workbench a partir do modelo MRN você terá que fazer o download do plugin [DBdoc](https://github.com/luizventurote/banco-de-dados-II/blob/master/dicionario-de-dados/plugin/dbdoc_plugin.lua).
@@ -284,22 +477,22 @@ Para criar um dicionário de dados no MySQL Workbench a partir do modelo MRN voc
 ## Dicionário de Dados ##
 
 ### aluno ###
-|    CAMPO   | TIPO        | NULO | EXTRA          | COMENTARIOS                  
-|------------|-------------|------|----------------|------------------------------
-| id         | INT         | NO   | AUTO_INCREMENT |                                
-| nome       | VARCHAR(45) | NO   |	               |                              
-| nascimento |	DATE       | SI   |	               | Data de nascimento do aluno.
-| email      | VARCHAR(30) | SI   |	               |                              
-| endereço   | VARCHAR(50) | SI   |	               |                              
-| turma_id   | INT         | NO   |                |                              
+|    CAMPO   | TIPO        | NULO | EXTRA          | COMENTARIOS                  |
+|------------|-------------|------|----------------|------------------------------|
+| id         | INT         | NO   | AUTO_INCREMENT |                              | 
+| nome       | VARCHAR(45) | NO   |	               |                              |
+| nascimento |	DATE       | SI   |	               | Data de nascimento do aluno. |
+| email      | VARCHAR(30) | SI   |	               |                              |
+| endereço   | VARCHAR(50) | SI   |	               |                              |
+| turma_id   | INT         | NO   |                |                              |
 
 
 ### turma ###
-|    CAMPO   | TIPO        | NULO | EXTRA          | COMENTARIOS                  
-|------------|-------------|------|----------------|------------------------------
-| id	     | INT	       | NO	  |                |                              
-| nome	     | VARCHAR(5)  | NO	  |                | Nome da turma.               
-| ano	     | INT	       | SI	  |                | Ano inicial da turma.
+|    CAMPO   | TIPO        | NULO | EXTRA          | COMENTARIOS                  |
+|------------|-------------|------|----------------|------------------------------|
+| id	     | INT	       | NO	  |                |                              |
+| nome	     | VARCHAR(5)  | NO	  |                | Nome da turma.               |
+| ano	     | INT	       | SI	  |                | Ano inicial da turma.        |
 
 
 
@@ -312,3 +505,5 @@ http://www.marilia.unesp.br/Home/Instituicao/Docentes/EdbertoFerneda/BD%20-%20As
 http://gomeshp.plughosting.com.br/apostilas/ASI_10_DDados_Quest_resp.pdf
 http://w3.ualg.pt/~jvo/ep/dd.pdf
 http://www.inf.ufrgs.br/~vrqleithardt/Teaching/AULA%20SEMANA%208%20a%2012/Dicionariodados.pdf
+http://dev.mysql.com/doc/refman/5.7/en/information-schema.html
+http://www.ecologiadosdados.com/2013/10/mysql-dicionario-de-dados.html
